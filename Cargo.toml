@@ -1,0 +1,9 @@
+[package]
+authors = ["zaaack <zaaack@qq.com>"]
+name = "aria2-gui"
+version = "0.1.0"
+[dependencies]
+notify = "4.0.1"
+open = "1.2.0"
+rocket = "0.3.0"
+rocket_codegen = "0.3.0"
