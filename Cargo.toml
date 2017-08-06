@@ -2,8 +2,28 @@
 authors = ["zaaack <zaaack@qq.com>"]
 name = "aria2-gui"
 version = "0.1.0"
+
 [dependencies]
-notify = "4.0.1"
+base64 = "0.6.0"
+notify-rust = "3.4.1"
 open = "1.2.0"
 rocket = "0.3.0"
 rocket_codegen = "0.3.0"
+serde = "1.0.11"
+serde_derive = "1.0.11"
+serde_json = "1.0.2"
+
+[dependencies.rocket_contrib]
+default-features = false
+features = ["json", "tera_templates"]
+version = "0.3.0"
+
+[target]
+
+[target."cfg(windows)"]
+
+[target."cfg(windows)".dependencies]
+
+[target."cfg(windows)".dependencies.winrt]
+features = ["windows-data", "windows-ui"]
+version = "0.3.0"

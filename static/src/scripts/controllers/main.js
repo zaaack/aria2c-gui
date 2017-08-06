@@ -175,6 +175,13 @@
             });
         };
 
+        $scope.openTaskFile = function (task) {
+            aria2TaskService.openTaskFile(task)
+        }
+        $scope.openTaskFolder = function (task) {
+            aria2TaskService.openTaskFolder(task)
+        }
+
         $scope.clearStoppedTasks = function () {
             ariaNgCommonService.confirm('Confirm Clear', 'Are you sure you want to clear stopped tasks?', 'warning', function () {
                 $rootScope.loadPromise = aria2TaskService.clearStoppedTasks(function (response) {

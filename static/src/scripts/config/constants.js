@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-
+    var config = window.__CONFIG__ || {}
     angular.module('ariaNg').constant('ariaNgConstants', {
         title: 'AriaNg',
         appPrefix: 'AriaNg',
@@ -22,7 +22,7 @@
         browserNotification: false,
         rpcAlias: '',
         rpcHost: '',
-        rpcPort: '6800',
+        rpcPort: config.rpcPort || '6800',
         rpcInterface: 'jsonrpc',
         protocol: 'http',
         httpMethod: 'POST',

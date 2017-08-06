@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('ariaNg').factory('aria2TaskService', ['$q', '$translate', 'bittorrentPeeridService', 'aria2Errors', 'aria2RpcService', 'ariaNgCommonService', 'ariaNgLogService', function ($q, $translate, bittorrentPeeridService, aria2Errors, aria2RpcService, ariaNgCommonService, ariaNgLogService) {
+    angular.module('ariaNg').factory('aria2TaskService', ['$q', '$http', '$translate', 'bittorrentPeeridService', 'aria2Errors', 'aria2RpcService', 'ariaNgCommonService', 'ariaNgLogService', function ($q, $http, $translate, bittorrentPeeridService, aria2Errors, aria2RpcService, ariaNgCommonService, ariaNgLogService) {
         var getFileName = function (file) {
             if (!file) {
                 ariaNgLogService.warn('[aria2TaskService.getFileName] file is null');
@@ -733,7 +733,25 @@
                 }
 
                 return healthPercent;
-            }
+            },
+            openTaskFile: function(task) {
+                console.log('task', task)
+                $http({
+                    url: '/api/open?file=' + encodeURIComponent(task.files[0].path),
+                    method: 'GET',
+                })
+                .then(console.log)
+                .catch(console.error)
+            },
+            openTaskFolder: function(task) {
+                var file = task.files[0].path.replace(/[\/\\][^\/\\]+$/, '')
+                $http({
+                    url: '/api/open?file=' + encodeURIComponent(file),
+                    method: 'GET',
+                })
+                .then(console.log)
+                .catch(console.error)
+            },
         };
     }]);
 }());

@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    var config = window.__CONFIG__ || {}
     angular.module('ariaNg').constant('aria2AllOptions', {
         // Aria2 Option Defination EXAMPLE:
         // 'option key': {
@@ -527,7 +528,7 @@
         'rpc-allow-origin-all': {
             type: 'boolean',
             readonly: true,
-            defaultValue: 'false'
+            defaultValue: 'true'
         },
         'rpc-listen-all': {
             type: 'boolean',

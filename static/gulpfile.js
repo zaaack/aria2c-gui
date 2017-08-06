@@ -41,7 +41,7 @@ gulp.task('lint', function () {
 
 gulp.task('html', ['styles', 'scripts', 'views'], function () {
     return gulp.src([
-        'src/*.html'
+        'src/*.html.tera'
     ]).pipe($.useref({searchPath: ['.tmp', 'src', '.']}))
         .pipe($.injectVersion())
         .pipe($.if('js/*.js', $.replace(/\/\/# sourceMappingURL=.*/g, '')))
@@ -49,8 +49,11 @@ gulp.task('html', ['styles', 'scripts', 'views'], function () {
         .pipe($.if(['js/moment-with-locales-*.min.js', 'js/plugins.min.js', 'js/aria-ng.min.js'], $.uglify({preserveComments: 'license'})))
         .pipe($.if(['css/plugins.min.css', 'css/aria-ng.min.css'], $.cssnano({safe: true, autoprefixer: false})))
         .pipe($.if(['js/plugins.min.js', 'js/aria-ng.min.js', 'css/plugins.min.css', 'css/aria-ng.min.css'], $.rev()))
-        .pipe($.if('*.html', $.htmlmin({collapseWhitespace: true})))
-        .pipe($.revReplace())
+        .pipe($.if('*.html.tera', $.htmlmin({collapseWhitespace: false})))
+        .pipe($.if('*.html', $.htmlmin({collapseWhitespace: false})))
+        .pipe($.revReplace({
+            replaceInExtensions: ['.js', '.css', '.html', '.hbs', '.tera'],
+        }))
         .pipe(gulp.dest('dist'));
 });
 
@@ -85,7 +88,7 @@ gulp.task('manifest', function () {
             preferOnline: true,
             network: ['*'],
             filename: 'index.manifest',
-            exclude: 'index.manifest'
+            exclude: ['index.manifest', "index.html"]
         }))
         .pipe(gulp.dest('dist'));
 });
@@ -94,7 +97,8 @@ gulp.task('extras', function () {
     return gulp.src([
         'LICENSE',
         'src/*.*',
-        '!src/*.html'
+        '!src/*.html',
+        '!src/*.html.tera'
     ], {
         dot: true
     }).pipe(gulp.dest('dist'));
@@ -116,6 +120,7 @@ gulp.task('serve', ['styles', 'scripts', 'fonts'], function () {
 
     gulp.watch([
         'src/*.html',
+        'src/*.html.tera',
         'src/langs/*.txt',
         'src/views/*.html',
         'src/imgs/**/*',
