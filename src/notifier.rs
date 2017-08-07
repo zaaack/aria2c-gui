@@ -11,7 +11,7 @@ pub fn notify(msg_title: &str, msg_body: &str) {
 }
 
 #[cfg(target_os = "windows")]
-fn notify(msg_title: &str, msg_body: &str) {
+pub fn notify(msg_title: &str, msg_body: &str) {
     extern crate winrt;
     use winrt::*;
     use winrt::windows::data::xml::dom::*;

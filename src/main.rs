@@ -1,4 +1,4 @@
-#![feature(plugin, custom_derive)]
+#![feature(plugin, custom_derive,toowned_clone_into)]
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
@@ -21,6 +21,7 @@ use rocket::State;
 mod api;
 mod notifier;
 mod tray;
+mod aria2c;
 
 use tray::{Action, Item, Menu, start_tray};
 
@@ -85,8 +86,9 @@ fn main() {
     let menu = create_menu();
     let port_ = port.clone();
     let rpc_port_ = rpc_port.clone();
+    let aria2c_tx = aria2c::start_aria2c(rpc_port);
     tray::start_tray(menu, move |action: Action| match action {
-        Action::Clicked { mut item, seq_id } => {
+        Action::Clicked { item, seq_id } => {
             println!("item:{:?}, seq_id:{:?}", item, seq_id);
             if seq_id == 0 {
                 open::that(format!("http://127.0.0.1:{port}/#!/settings/rpc/set/http/127.0.0.1/{rpc_port}/jsonrpc", port=port_, rpc_port=rpc_port_)).map_err(|err| {
@@ -94,6 +96,7 @@ fn main() {
                     }).unwrap();
                 Action::None
             } else if seq_id == 1 {
+                aria2c_tx.send(-1).unwrap();
                 Action::Quit
             } else {
                 Action::None

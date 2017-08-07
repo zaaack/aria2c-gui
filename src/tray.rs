@@ -2,6 +2,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::env;
 use std;
+use std::fs;
 use std::process::Child;
 use std::process::ChildStdin;
 use std::process::ChildStdout;
@@ -84,11 +85,22 @@ where
 {
 
     thread::spawn(move || {
-        let mut path = env::home_dir().unwrap_or(env::temp_dir());
-        path.push("go_tray");
-        let path = path.as_path();
+        let mut path = env::home_dir()
+            .map(|mut path| {
+                path.push(".config");
+                path
+            })
+            .unwrap_or(env::temp_dir());
+        let mut tmp = PathBuf::new();
+        path.clone_into(&mut tmp);
+        fs::create_dir_all(path);
+        tmp.push("go_tray");
+        let path = tmp.as_path();
         if !path.exists() {
+            #[cfg(target_os="macos")]
             let tray_bin = include_bytes!("../tray/tray_darwin_release");
+            #[cfg(target_os="linux")]
+            let tray_bin = include_bytes!("../tray/tray_linux_release");
             let mut file = OpenOptions::new()
                 .mode(0o766)
                 .create_new(true)
