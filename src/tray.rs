@@ -1,15 +1,12 @@
 use std::io::prelude::*;
-use std::env;
 use std;
-use std::fs;
 use std::process::{Command, Stdio};
 use std::path::PathBuf;
 use std::io::BufReader;
 use serde_json;
 use std::thread;
-use std::fs::OpenOptions;
 
-use std::os::unix::fs::OpenOptionsExt;
+use utils;
 // type Item struct {
 // 	Title   string `json:"title"`
 // 	Tooltip string `json:"tooltip"`
@@ -75,35 +72,13 @@ where
     C: Fn(Action) -> Action + 'static + Send,
 {
 
+    #[cfg(target_os="macos")]
+    let tray_bin = include_bytes!("../tray/tray_darwin_release");
+    #[cfg(target_os="linux")]
+    let tray_bin = include_bytes!("../tray/tray_linux_release");
+    let path = utils::init_files("go_tray", tray_bin);
     thread::spawn(move || {
-        let path = env::home_dir()
-            .map(|mut path| {
-                path.push(".cache");
-                path.push("aria2c-gui-rs");
-                path
-            })
-            .unwrap_or(env::temp_dir());
-        let mut tmp = PathBuf::new();
-        path.clone_into(&mut tmp);
-        fs::create_dir_all(path).err().map(|err| {
-            println!("{:?}", err);
-        });
-        tmp.push("go_tray");
-        let path = tmp.as_path();
-        if !path.exists() {
-            #[cfg(target_os="macos")]
-            let tray_bin = include_bytes!("../tray/tray_darwin_release");
-            #[cfg(target_os="linux")]
-            let tray_bin = include_bytes!("../tray/tray_linux_release");
-            let mut file = OpenOptions::new()
-                .mode(0o766)
-                .create_new(true)
-                .write(true)
-                .open(path)
-                .unwrap();
-            file.write_all(tray_bin).unwrap();
-        }
-        let mut child = match Command::new(path)
+        let mut child = match Command::new(path.as_os_str())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn() {

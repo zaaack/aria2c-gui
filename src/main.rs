@@ -9,6 +9,8 @@ extern crate base64;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate debug_rs;
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use rocket::response::NamedFile;
@@ -16,6 +18,7 @@ use rocket_contrib::Template;
 use rocket::config::{Config, Environment};
 use rocket::State;
 
+mod utils;
 mod api;
 mod notifier;
 mod tray;
@@ -27,20 +30,26 @@ use tray::{Action, Item, Menu};
 mod tests;
 
 #[derive(Serialize)]
-struct Aria2Config {}
+struct WebConfig {}
+
+#[derive(Serialize)]
+struct Context {
+    config: WebConfig,
+    static_path: String,
+}
 
 
 #[get("/")]
-fn index(config: State<Aria2Config>) -> Template {
+fn index(context: State<Context>) -> Template {
     Template::render(
         "index",
-        json!({"config": serde_json::to_string_pretty(config.inner()).unwrap()}),
+        json!({"config": serde_json::to_string_pretty(&context.config).unwrap()}),
     )
 }
 
 #[get("/<file..>")]
-fn files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/dist").join(file)).ok()
+fn files(file: PathBuf, context: State<Context>) -> Option<NamedFile> {
+    NamedFile::open(Path::new(&context.static_path).join(file)).ok()
 }
 
 fn get_port(prefer: u16) -> u16 {
@@ -104,10 +113,13 @@ fn main() {
         }
         _ => Action::None,
     });
+
+    let static_path = utils::unzip("static", include_bytes!("../static/dist.zip"));
+    let static_path = static_path.as_os_str();
     let config = Config::build(Environment::Staging)
         .address("127.0.0.1")
         .port(port)
-        .extra("template_dir", "static/dist")
+        .extra("template_dir", static_path.to_string_lossy().into_owned())
         .finalize()
         .unwrap();
 
@@ -123,7 +135,10 @@ fn main() {
                 files,
             ],
         )
-        .manage(Aria2Config {})
+        .manage(Context {
+            config: WebConfig {},
+            static_path: static_path.to_string_lossy().into_owned(),
+        })
         .attach(Template::fairing())
         .launch();
 }

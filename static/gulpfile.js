@@ -88,7 +88,7 @@ gulp.task('manifest', function () {
             preferOnline: true,
             network: ['*'],
             filename: 'index.manifest',
-            exclude: ['index.manifest', "index.html"]
+            exclude: ['index.manifest', 'index.html']
         }))
         .pipe(gulp.dest('dist'));
 });
@@ -148,7 +148,15 @@ gulp.task('info', function () {
     ]).pipe($.size({title: 'build', gzip: true}));
 });
 
-gulp.task('build', $.sequence('lint', 'html', 'langs', 'images', 'fonts', 'manifest', 'extras', 'info'));
+gulp.task('zip', function () {
+    return gulp.src([
+        'dist/**/*'
+    ])
+    .pipe($.zip('dist.zip'))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('build', $.sequence('lint', 'html', 'langs', 'images', 'fonts', 'manifest', 'extras', 'info', 'zip'));
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
