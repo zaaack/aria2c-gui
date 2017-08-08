@@ -1,21 +1,12 @@
 use std::io::prelude::*;
-use std::fs::File;
 use std::env;
 use std;
 use std::fs;
-use std::process::Child;
-use std::process::ChildStdin;
-use std::process::ChildStdout;
 use std::process::{Command, Stdio};
-use std::path::Path;
 use std::path::PathBuf;
 use std::io::BufReader;
-use std::io::BufWriter;
 use serde_json;
-use std::sync::mpsc::channel;
 use std::thread;
-use std::sync::Arc;
-use std::cell::RefCell;
 use std::fs::OpenOptions;
 
 use std::os::unix::fs::OpenOptionsExt;
@@ -85,15 +76,18 @@ where
 {
 
     thread::spawn(move || {
-        let mut path = env::home_dir()
+        let path = env::home_dir()
             .map(|mut path| {
-                path.push(".config");
+                path.push(".cache");
+                path.push("aria2c-gui-rs");
                 path
             })
             .unwrap_or(env::temp_dir());
         let mut tmp = PathBuf::new();
         path.clone_into(&mut tmp);
-        fs::create_dir_all(path);
+        fs::create_dir_all(path).err().map(|err| {
+            println!("{:?}", err);
+        });
         tmp.push("go_tray");
         let path = tmp.as_path();
         if !path.exists() {

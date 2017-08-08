@@ -11,8 +11,6 @@ extern crate rocket_contrib;
 extern crate serde_derive;
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
-use std::io;
-use std::collections::HashMap;
 use rocket::response::NamedFile;
 use rocket_contrib::Template;
 use rocket::config::{Config, Environment};
@@ -23,7 +21,7 @@ mod notifier;
 mod tray;
 mod aria2c;
 
-use tray::{Action, Item, Menu, start_tray};
+use tray::{Action, Item, Menu};
 
 #[cfg(test)]
 mod tests;
@@ -78,22 +76,24 @@ fn create_menu() -> Menu {
     }
 }
 
+fn open_url(port: u16, rpc_port: u16) {
+    open::that(format!("http://127.0.0.1:{port}/#!/settings/rpc/set/http/127.0.0.1/{rpc_port}/jsonrpc", port=port, rpc_port=rpc_port)).map_err(|err| {
+            println!("open failed: {:?}", err);
+        }).unwrap();
+}
+
 fn main() {
 
     let port = get_port(23156);
     let rpc_port = get_port(6800);
 
     let menu = create_menu();
-    let port_ = port.clone();
-    let rpc_port_ = rpc_port.clone();
     let aria2c_tx = aria2c::start_aria2c(rpc_port);
     tray::start_tray(menu, move |action: Action| match action {
         Action::Clicked { item, seq_id } => {
             println!("item:{:?}, seq_id:{:?}", item, seq_id);
             if seq_id == 0 {
-                open::that(format!("http://127.0.0.1:{port}/#!/settings/rpc/set/http/127.0.0.1/{rpc_port}/jsonrpc", port=port_, rpc_port=rpc_port_)).map_err(|err| {
-                        println!("open failed: {:?}", err);
-                    }).unwrap();
+                open_url(port, rpc_port);
                 Action::None
             } else if seq_id == 1 {
                 aria2c_tx.send(-1).unwrap();
@@ -111,7 +111,7 @@ fn main() {
         .finalize()
         .unwrap();
 
-    notifier::notify("haha", "aaaa");
+    open_url(port, rpc_port);
 
     rocket::custom(config, true)
         .mount(

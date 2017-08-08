@@ -41,7 +41,9 @@ pub fn start_aria2c(port: u16) -> Sender<i8> {
         download_dir.push("Downloads");
         let mut tmp = PathBuf::new();
         download_dir.clone_into(&mut tmp);
-        fs::create_dir_all(download_dir);
+        fs::create_dir_all(download_dir).err().map(|err| {
+            println!("{:?}", err);
+        });
         let mut child = match Command::new("aria2c")
             .arg("--enable-rpc")
             .arg(format!("--rpc-listen-port={port}", port = port))
