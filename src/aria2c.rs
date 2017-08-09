@@ -59,6 +59,8 @@ pub fn start_aria2c(port: u16) -> Sender<i8> {
             match rx.recv() {
                 Ok(-1) => {
                     child.kill().unwrap();
+                    println!("Exit aria2c");
+                    break;
                 }
                 _ => (),
             }

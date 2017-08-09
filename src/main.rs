@@ -106,6 +106,7 @@ fn main() {
                 Action::None
             } else if seq_id == 1 {
                 aria2c_tx.send(-1).unwrap();
+                println!("Send tray quit");
                 Action::Quit
             } else {
                 Action::None

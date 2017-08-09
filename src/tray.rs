@@ -1,9 +1,9 @@
 use std::io::prelude::*;
-use std;
 use std::process::{Command, Stdio};
 use std::io::BufReader;
 use serde_json;
 use std::thread;
+use std::time::Duration;
 
 use utils;
 // type Item struct {
@@ -109,7 +109,9 @@ where
             let action = callback(action);
             if action == Action::Quit {
                 child.kill().unwrap();
-                std::process::exit(0);
+                // waiting for some cleanning
+                thread::sleep(Duration::from_millis(500));
+                ::std::process::exit(0);
             }
             let action_str = serde_json::to_string(&action).unwrap() + "\n";
             println!("write:{:?}", action_str);
