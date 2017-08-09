@@ -12,3 +12,4 @@ target/
 **/*.rs.bk
 
 tray
+err.log

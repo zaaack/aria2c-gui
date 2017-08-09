@@ -4,8 +4,6 @@ use std::io::prelude::*;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
-use serde_json;
-use std::thread;
 use std::fs::OpenOptions;
 use std::os::unix::fs::OpenOptionsExt;
 
