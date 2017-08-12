@@ -11,5 +11,4 @@ Cargo.lock
 target/
 **/*.rs.bk
 
-tray
 err.log
